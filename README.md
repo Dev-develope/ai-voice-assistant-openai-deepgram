@@ -76,7 +76,30 @@ SERVER=your-server-domain
 DEEPGRAM_API_KEY=your-deepgram-api-key
 VOICE_MODEL=your-preferred-voice-model
 OPENAI_API_KEY=your-openai-api-key
+
+# Text-to-speech provider selection (optional, defaults to "deepgram")
+# Set to "60db" to use 60db TTS instead of Deepgram.
+TTS_PROVIDER=deepgram
+# Required only when TTS_PROVIDER=60db
+SIXTYDB_API_KEY=your-60db-api-key
+SIXTYDB_VOICE_ID=your-60db-voice-id
 ```
+
+### Text-to-Speech Providers
+
+The text-to-speech layer is provider-agnostic. `app.js` builds a TTS service via
+`services/tts-factory.js`, which selects an implementation based on `TTS_PROVIDER`:
+
+| `TTS_PROVIDER` | Implementation | Notes |
+| --- | --- | --- |
+| `deepgram` (default) | `services/tts-service.js` | Deepgram `/v1/speak`, µ-law @ 8000 Hz |
+| `60db` (or `sixtydb`) | `services/tts-sixtydb-service.js` | 60db WebSocket TTS, MULAW @ 8000 Hz |
+
+Both implementations share the same interface (a `generate(gptReply, interactionCount)`
+method and a `'speech'` event), so they are fully interchangeable and the rest of the
+app is unaware of which one is active. The 60db provider uses the WebSocket API because
+it is the only 60db transport that emits MULAW @ 8000 Hz directly, matching Twilio's
+media-stream format with no transcoding.
 
 4. Configure Twilio:
 - Set up a Twilio phone number

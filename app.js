@@ -6,7 +6,7 @@ const ExpressWs = require('express-ws');
 const { GptService } = require('./services/gpt-service');
 const { StreamService } = require('./services/stream-service');
 const { TranscriptionService } = require('./services/transcription-service');
-const { TextToSpeechService } = require('./services/tts-service');
+const { createTextToSpeechService } = require('./services/tts-factory');
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 // Set up Express with WebSocket support
@@ -39,7 +39,7 @@ app.ws('/connection', (ws) => {
    const gptService = new GptService();
    const streamService = new StreamService(ws);
    const transcriptionService = new TranscriptionService();
-   const ttsService = new TextToSpeechService({});
+   const ttsService = createTextToSpeechService();
    let marks = [];              // Track audio completion markers
    let interactionCount = 0;    // Count back-and-forth exchanges
 
